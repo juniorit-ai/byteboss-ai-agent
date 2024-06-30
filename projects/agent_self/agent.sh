@@ -10,7 +10,7 @@ else
 fi
 
 if [ -f ".env" ]; then
-    source ".env"
+    export $(grep -v '^#' .env | xargs)
 else
     echo ".env file not found"
 fi
