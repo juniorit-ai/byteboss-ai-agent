@@ -1,0 +1,5 @@
+python-dotenv
+openai
+anthropic
+pyyaml
+gradio==4.36.1
