@@ -2,6 +2,7 @@ from openai import OpenAI
 import os
 import re
 import json
+from json_repair import repair_json
 import yaml
 from llm_interface import LLMInterface
 from system_message import SYSTEM_MESSAGE, UPDATE_SUMMARY_GUIDELINES, UPDATE_FILE_GUIDELINES, EXECUTE_COMMANDS_GUIDELINES, ERROR_FIX_GUIDELINES
@@ -71,9 +72,10 @@ class LLMOpenAI(LLMInterface):
         #save the raw output to a file
         if logs_dir is not None:
             with open(os.path.join(logs_dir, f"output_raw_{api_invoke_times}.log"), "w") as f:
-                f.write(response.content.text)
+                f.write(response.choices[0].message.content)
 
         assistant_message = remove_json_markdown_block_signs(response.choices[0].message.content)
+        assistant_message = repair_json(assistant_message)
         json_data = json.loads(assistant_message)
         json_data_str = yaml.dump(json_data, allow_unicode=True, default_flow_style=False, width=4096)
 

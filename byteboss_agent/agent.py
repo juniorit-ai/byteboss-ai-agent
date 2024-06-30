@@ -157,7 +157,7 @@ class Agent:
                 prompt_files_context += f'{content}\n\n'
                 
         if not files_with_todo_context and not prompt_files_context:
-            raise Exception('You must have at least one markdown prompt file in the output directory.')
+            raise Exception(f'You must have at least one markdown prompt file with the extension `.prompt.md` or a file containing `TODO:` comments in the directory {code_output_dir}.')
         
         if prompt_files_context:
             prompt_files_context = f'{prompt_files_message}\n\n(""\n{prompt_files_context.strip()}\n"")'

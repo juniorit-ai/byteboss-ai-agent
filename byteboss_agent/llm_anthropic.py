@@ -2,6 +2,7 @@ from anthropic import Anthropic
 import os
 import re
 import json
+from json_repair import repair_json
 import yaml
 from llm_interface import LLMInterface
 from system_message import SYSTEM_MESSAGE, UPDATE_SUMMARY_GUIDELINES, UPDATE_FILE_GUIDELINES, EXECUTE_COMMANDS_GUIDELINES, ERROR_FIX_GUIDELINES
@@ -70,9 +71,10 @@ class LLMAnthropic(LLMInterface):
         #save the raw output to a file
         if logs_dir is not None:
             with open(os.path.join(logs_dir, f"output_raw_{api_invoke_times}.log"), "w") as f:
-                f.write(response.content.text)
+                f.write(response.content[0].text)
 
-        assistant_message = remove_json_markdown_block_signs(response.content.text)
+        assistant_message = remove_json_markdown_block_signs(response.content[0].text)
+        assistant_message = repair_json(assistant_message)
         json_data = json.loads(assistant_message)
         json_data_str = yaml.dump(json_data, allow_unicode=True, default_flow_style=False, width=4096)
 
@@ -90,9 +92,12 @@ class LLMAnthropic(LLMInterface):
         prompt_str = f"{context}"
         prompt_str += f"\n\n{UPDATE_SUMMARY_GUIDELINES}"
         
+        prompt_str += f"\n\nThe output JSON format must be the same as the output of JSON.stringify() in JavaScript. Ensure all double quotes and new lines within the string values are escaped."
+        
+        
         messages = [
                     {"role": "user", "content": SYSTEM_MESSAGE},
-                    {"role": "assistant", "content": "sure, let me help you with that."}
+                    {"role": "assistant", "content": "sure, I will escape all double quotes and new lines within the string in the json ouput just as JSON.stringify() in JavaScript does."}
                 ]
         
         if len(image_urls) > 0:
