@@ -3,7 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-logs
+**/logs
+projects/JuniorIT-AI-Engineering
 
 # C extensions
 *.so
