@@ -10,7 +10,6 @@ from llm_anthropic import LLMAnthropic
 def get_api_key_for_provider(provider):
     return os.getenv(f'{provider.upper()}_API_KEY')
 
-
 def main():
     load_dotenv()
 
