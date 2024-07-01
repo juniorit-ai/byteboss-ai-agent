@@ -5,7 +5,7 @@ import json
 from json_repair import repair_json
 import yaml
 from llm_interface import LLMInterface
-from system_message import SYSTEM_MESSAGE, UPDATE_SUMMARY_GUIDELINES, UPDATE_FILE_GUIDELINES, EXECUTE_COMMANDS_GUIDELINES, ERROR_FIX_GUIDELINES
+from system_message import SYSTEM_MESSAGE, UPDATE_SUMMARY_GUIDELINES, UPDATE_FILE_GUIDELINES, IMAGE_TO_CODE_GUIDELINES, EXECUTE_COMMANDS_GUIDELINES, ERROR_FIX_GUIDELINES
 
 api_invoke_times = 0
 
@@ -87,10 +87,14 @@ class LLMAnthropic(LLMInterface):
         return assistant_message, messages
 
 
-    def get_ai_update_summary(self, context, image_urls=[]):
+    def get_ai_code_files(self, context, image_urls=[]):
 
         prompt_str = f"{context}"
-        prompt_str += f"\n\n{UPDATE_SUMMARY_GUIDELINES}"
+        
+        if len(image_urls) > 0:
+            prompt_str += f"\n\n{IMAGE_TO_CODE_GUIDELINES}"
+        else:
+            prompt_str += f"\n\n{UPDATE_SUMMARY_GUIDELINES}"
         
         prompt_str += f"\n\nThe output JSON format must be the same as the output of JSON.stringify() in JavaScript. Ensure all double quotes and new lines within the string values are escaped."
         

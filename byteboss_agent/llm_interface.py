@@ -6,7 +6,7 @@ class LLMInterface(ABC):
         pass
     
     @abstractmethod
-    def get_ai_update_summary(self, context, image_urls):
+    def get_ai_code_files(self, context, image_urls):
         pass
 
     @abstractmethod

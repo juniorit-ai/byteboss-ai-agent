@@ -123,6 +123,59 @@ If you need to update file `lib/file1.py`, your output should be:
 
 Ensure your response follows these guidelines and format exactly."""
 
+IMAGE_TO_CODE_GUIDELINES = f"""### Guideline for AI Coding Assistant Agent Response:
+
+1. **Files to Create/Update**: Only include files that need to create or update. Do not include files that do not require changes.
+2. **TODO Comments**: If a non-markdown file contains `TODO:` comments, update that file and any related files as necessary.
+3. **Instructions Handling**: For any text saying "Please complete the code as per the instructions below:", follow the instructions to add or update files accordingly.
+4. **Reference Files**: Most code files provided are for your reference only.
+
+### Task Requirements:
+
+- **Code Analysis**: check all the code according to any `TODO` comments or as required to find out which files we need to update and create (the proposed file path and name information). 
+- **Current Code Directory**: the current code is located under directory {code_output_dir}, please make sure all the filepath are relative to this directory
+- **Image**: Refer to the image(s) to generate/update code as per the instructions
+- **Output Format**: Ensure the output is in the following JSON format:
+
+The fields in the json data:
+
+1. files.filepath - file name including path, which should be relative to directory {code_output_dir}
+2. files.code - the source code of the file
+3. gitComments - a string used for the git commit comments message for the update, empty string '' if no code update required to fix the error 
+
+```json
+{{
+    "agentOutput": {{
+        "files": [
+            {{
+                "filepath": "string",
+                "code": "string"
+            }}
+        ],
+        "gitComments": "string"
+    }}
+}}
+```
+
+**Example**:
+If you need to update or add `file1.py` and install `package1` and `package2`, your output should be:
+
+```json
+{{
+    "agentOutput": {{
+        "files": [
+            {{
+                "filepath": "path/file1.py",
+                "code": "the code of the file with comments created by AI"
+            }}
+        ],
+        "gitComments": "the comments to be added to the git commit"
+    }}
+}}
+```
+
+Ensure your response follows these guidelines and format exactly."""
+
 EXECUTE_COMMANDS_GUIDELINES = """### Guideline for setup/install and test shell commands:
 
 1. **New package Installation**:  If new packages are introduced, include the installation commands in the setup section. Provide an empty array [] if not required.
