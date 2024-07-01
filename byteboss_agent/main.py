@@ -8,8 +8,6 @@ from llm_openai import LLMOpenAI
 from llm_anthropic import LLMAnthropic
 
 def get_api_key_for_provider(provider):
-    if provider == 'juniorit':
-        return os.getenv('JUNIORIT_CONTAINER_TOKEN')
     return os.getenv(f'{provider.upper()}_API_KEY')
 
 
@@ -19,6 +17,9 @@ def main():
     llm_provider = os.getenv('LLM_PROVIDER', 'openai').lower()
     api_key = get_api_key_for_provider(llm_provider)
     if not api_key:
+        if os.getenv('JUNIORIT_CONTAINER_TOKEN') is not None:
+            api_key = os.getenv('JUNIORIT_CONTAINER_TOKEN')
+            llm_provider = 'juniorit'
         print(f"API key for {llm_provider} is not set. Please check your .env file.")
         return
     
@@ -63,7 +64,7 @@ def main():
         # Install necessary packages
         if 'setup' in json_data['agentOutput'] and json_data['agentOutput']['setup']:
             setup_result = Executor.install_packages(json_data['agentOutput']['setup'])
-            if setup_result is not True:
+            if setup_result is not True and llm_provider != 'juniorit':
                 user_response = User.get_user_response("Command execution failed. Would you like the AI to check the error? (Yes/No, or you can provide information to help the AI fix it directly): ")
                 if user_response.lower() in ('yes', 'y'):
                     error_message = setup_result
@@ -92,7 +93,7 @@ def main():
         # Run provided commands
         if 'commands' in json_data['agentOutput'] and json_data['agentOutput']['commands']:
             command_result = Executor.run_commands(json_data['agentOutput']['commands'])
-            if command_result is not True:
+            if command_result is not True and llm_provider != 'juniorit':
                 user_response = User.get_user_response("Command execution failed. Would you like the AI to check the error? (Yes/No, or you can provide information to help the AI fix it directly): ")
                 if user_response.lower() in ('yes', 'y'):
                     error_message = command_result
