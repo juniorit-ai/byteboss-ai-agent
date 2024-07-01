@@ -8,6 +8,8 @@ from llm_openai import LLMOpenAI
 from llm_anthropic import LLMAnthropic
 
 def get_api_key_for_provider(provider):
+    if provider == 'juniorit':
+        return os.getenv('JUNIORIT_CONTAINER_TOKEN')
     return os.getenv(f'{provider.upper()}_API_KEY')
 
 
@@ -28,6 +30,8 @@ def main():
         llm = LLMOpenAI(api_key, os.getenv('OPENAI_MODEL', 'gpt-4o-2024-05-13'))
     elif llm_provider == 'deepseek':
         llm = LLMOpenAI(api_key, os.getenv('DEEPSEEK_MODEL', 'deepseek-coder'), os.getenv('DEEPSEEK_API_URL', 'https://api.deepseek.com'))
+    elif llm_provider == 'juniorit':
+        llm = LLMOpenAI(api_key, 'juniorit', 'https://juniorit.ai/rest/llm')
     elif llm_provider == 'anthropic':
         llm = LLMAnthropic(api_key, os.getenv('ANTHROPIC_MODEL', 'claude-3-5-sonnet-20240620'))
     else:
