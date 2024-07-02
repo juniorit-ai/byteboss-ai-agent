@@ -12,6 +12,9 @@ def get_api_key_for_provider(provider):
 
 def main():
     load_dotenv()
+    
+    if os.getenv('LOGS_DIR') :
+        os.makedirs(os.getenv('LOGS_DIR'), exist_ok=True)
 
     llm_provider = os.getenv('LLM_PROVIDER', 'openai').lower()
     api_key = get_api_key_for_provider(llm_provider)
