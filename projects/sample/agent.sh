@@ -11,8 +11,6 @@ fi
 
 if [ -f ".env" ]; then
     export $(grep -v '^#' .env | xargs)
-else
-    echo ".env file not found"
 fi
 
 # Get the real path of the Python script
@@ -24,5 +22,5 @@ if [ ! -f "$agent" ]; then
     exit 1
 fi
 
-python "$agent" "$@"
+python3 "$agent" "$@"
 )

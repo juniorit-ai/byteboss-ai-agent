@@ -19,8 +19,9 @@ def main():
         if os.getenv('JUNIORIT_CONTAINER_TOKEN') is not None:
             api_key = os.getenv('JUNIORIT_CONTAINER_TOKEN')
             llm_provider = 'juniorit'
-        print(f"API key for {llm_provider} is not set. Please check your .env file.")
-        return
+        else:
+            print(f"API key for {llm_provider} is not set. Please check your .env file.")
+            return
     
     code_references_dir = os.getenv('CODE_REFERENCES_DIR', '../code-references')
     code_output_dir = os.getenv('CODE_OUTPUT_DIR', '../code-output')
