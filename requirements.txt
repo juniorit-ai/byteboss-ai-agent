@@ -3,4 +3,4 @@ openai
 anthropic
 pyyaml
 json-repair
-gradio==4.36.1
+gradio
