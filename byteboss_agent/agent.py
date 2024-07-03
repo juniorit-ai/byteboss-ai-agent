@@ -32,6 +32,7 @@ class Agent:
         '.sh': 'bash',
         '.pl': 'perl',
         '.sql': 'sql',
+        '.txt': 'text',
     }
 
     @staticmethod
