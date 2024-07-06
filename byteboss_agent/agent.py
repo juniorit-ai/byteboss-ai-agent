@@ -1,5 +1,6 @@
 import os
 import base64
+from tag_script_instructions import TAG_SCRIPT_INSTRUCTIONS
 
 def get_relative_path(root_path, full_path):
     # Convert root_path and full_path to absolute paths
@@ -87,6 +88,8 @@ class Agent:
                     continue
                 if file_path.endswith('.prompt.done.md'):
                     continue
+                if file_path.endswith('.tag.done.md'):
+                    continue
                 if file_path.endswith('ignore-by-agent.txt'):
                     continue
                 
@@ -125,8 +128,8 @@ class Agent:
         ignore_list = Agent.load_ignore_list(os.path.join(code_output_dir, ignore_file))
         output_files, out_image_urls = Agent.read_files_in_directory(code_output_dir, ignore_list)
         if output_files:
-            non_todo_files = {fp: c for fp, c in output_files.items() if f'{T2DO}:' not in c and not fp.endswith('.prompt.md')}
-            todo_files = {fp: c for fp, c in output_files.items() if f'{T2DO}:' in c and not fp.endswith('.prompt.md')}
+            non_todo_files = {fp: c for fp, c in output_files.items() if f'{T2DO}:' not in c and not fp.endswith('.prompt.md') and not fp.endswith('.tag.md')}
+            todo_files = {fp: c for fp, c in output_files.items() if f'{T2DO}:' in c and not fp.endswith('.prompt.md') and not fp.endswith('.tag.md')}
             
             if non_todo_files:
                 output_files_context += f'There are total {len(non_todo_files)} files for you to check (do not contain {T2DO} comments), you may need to update it if it is necessary\n\n'
@@ -156,13 +159,30 @@ class Agent:
                 
             for file_path, content in prompt_files.items():
                 prompt_files_context += f'{content}\n\n'
+            
+        tag_files_message = ''
+        tag_files_context = ''
+        
+        # Combine all the *.tag.md files content together and show it, just separate by line
+        tag_files = {fp: c for fp, c in output_files.items() if fp.endswith('.tag.md')}
+        if tag_files:
+            if not files_with_todo_context and not prompt_files_context:
+                tag_files_message = f'{TAG_SCRIPT_INSTRUCTIONS}\n\nPlease complete the code as per the below tag script content:'
+            else:
+                tag_files_message = 'In Addition, {TAG_SCRIPT_INSTRUCTIONS}\n\nPlease complete the code as per the below tag script content:'
                 
-        if not files_with_todo_context and not prompt_files_context:
-            raise Exception(f'You must have at least one markdown prompt file with the extension `.prompt.md` or a file containing `TODO:` comments in the directory {code_output_dir}.')
+            for file_path, content in tag_files.items():
+                tag_files_context += f'{content}\n\n'
+                
+        if not files_with_todo_context and not prompt_files_context and not tag_files_context:
+            raise Exception(f'You must have at least one markdown prompt file with the extension `.prompt.md`, `.tag.md` or a file containing `TODO:` comments in the directory {code_output_dir}.')
         
         if prompt_files_context:
             prompt_files_context = f'{prompt_files_message}\n\n(""\n{prompt_files_context.strip()}\n"")'
+            
+        if tag_files_context:
+            tag_files_context = f'{tag_files_message}\n\n(""\n{tag_files_context.strip()}\n"")'
         
-        context = referenced_files_context + output_files_context + files_with_todo_context + prompt_files_context
+        context = referenced_files_context + output_files_context + files_with_todo_context + prompt_files_context + tag_files_context
         
         return context, image_urls
