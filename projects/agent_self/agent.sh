@@ -14,7 +14,7 @@ if [ -f ".env" ]; then
 fi
 
 # Get the real path of the Python script
-agent="$(realpath "../../byteboss_agent/main.py")"
+agent=${BYTEBOSS_AGENT_PATH:-$(realpath "../../byteboss_agent/main.py")}
 
 # Check if the Python script exists
 if [ ! -f "$agent" ]; then
