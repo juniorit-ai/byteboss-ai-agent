@@ -5,7 +5,7 @@ __pycache__/
 
 **/logs
 projects/JuniorIT-AI-Engineering
-projects/test_*
+projects/test-*
 
 # C extensions
 *.so
