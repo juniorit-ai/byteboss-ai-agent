@@ -12,6 +12,32 @@ Welcome to ByteBoss AI Agent! ByteBoss is a sophisticated AI-powered software de
 - **Debugging and Optimization**: Utilize AI tools to debug and optimize your code for better performance.
 - **Documentation**: Automatically generate documentation for your software projects.
 
+### TagScript
+
+We are introducing a new scripting language named `TagScript`, which utilizes Large Language Models (LLMs) as compilers to generate code. Detailed guidelines for writing in tag script can be found in our repository. Please refer to the [tag script instructions](https://github.com/juniorit-ai/byteboss-ai-agent/blob/main/byteboss_agent/tag_script_instructions.py) for more details.
+
+**Tag Definitions:**
+
+Each line of tag script begins with an '@' symbol, indicating a tag. These tags serve as directives for code generation:
+1. `@create`: Creates a new code file with the specified name and extension.
+2. `@user`: Allows the user to execute shell commands or input data.
+3. `@call 'llm'`: Calls the LLM model to generate output.
+4. `@call 'function or interface name'`: Invokes a specific function or interface method.
+5. `@input`: Inputs data from variables or files for use in the LLM model or function.
+6. `@follow`: Provides guidelines on how to use or create the code.
+7. `@output`: Specifies the data output format.
+8. `@to`: Saves the output to a variable or file.
+9. `@import`: Imports or includes the necessary library or file.
+10. `@shell`: Executes shell commands within the code.
+
+**Additional Guidelines:**
+- If a function or interface called does not exist, it should be created according to the specified input and output requirements.
+- When importing a file, its content may need to be updated to meet specific requirements.
+- Various markdown code blocks may be used as guidelines for code creation; however, the final programming language should conform to the file extension.
+
+**File Extension:**
+- Files written in tag script should use the `.tagscript.md` extension to be recognized by the ByteBoss AI Agent.
+
 ## Features in Development
 
 ### Email Management

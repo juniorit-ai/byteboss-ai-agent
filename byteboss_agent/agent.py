@@ -88,7 +88,7 @@ class Agent:
                     continue
                 if file_path.endswith('.prompt.done.md'):
                     continue
-                if file_path.endswith('.tag.done.md'):
+                if file_path.endswith('.tagscript.done.md'):
                     continue
                 if file_path.endswith('ignore-by-agent.txt'):
                     continue
@@ -128,8 +128,8 @@ class Agent:
         ignore_list = Agent.load_ignore_list(os.path.join(code_output_dir, ignore_file))
         output_files, out_image_urls = Agent.read_files_in_directory(code_output_dir, ignore_list)
         if output_files:
-            non_todo_files = {fp: c for fp, c in output_files.items() if f'{T2DO}:' not in c and not fp.endswith('.prompt.md') and not fp.endswith('.tag.md')}
-            todo_files = {fp: c for fp, c in output_files.items() if f'{T2DO}:' in c and not fp.endswith('.prompt.md') and not fp.endswith('.tag.md')}
+            non_todo_files = {fp: c for fp, c in output_files.items() if f'{T2DO}:' not in c and not fp.endswith('.prompt.md') and not fp.endswith('.tagscript.md')}
+            todo_files = {fp: c for fp, c in output_files.items() if f'{T2DO}:' in c and not fp.endswith('.prompt.md') and not fp.endswith('.tagscript.md')}
             
             if non_todo_files:
                 output_files_context += f'There are total {len(non_todo_files)} files for you to check (do not contain {T2DO} comments), you may need to update it if it is necessary\n\n'
@@ -163,8 +163,8 @@ class Agent:
         tag_files_message = ''
         tag_files_context = ''
         
-        # Combine all the *.tag.md files content together and show it, just separate by line
-        tag_files = {fp: c for fp, c in output_files.items() if fp.endswith('.tag.md')}
+        # Combine all the *.tagscript.md files content together and show it, just separate by line
+        tag_files = {fp: c for fp, c in output_files.items() if fp.endswith('.tagscript.md')}
         if tag_files:
             if not files_with_todo_context and not prompt_files_context:
                 tag_files_message = f'{TAG_SCRIPT_INSTRUCTIONS}\n\nPlease complete the code as per the below tag script content:'
@@ -175,7 +175,7 @@ class Agent:
                 tag_files_context += f'{content}\n\n'
                 
         if not files_with_todo_context and not prompt_files_context and not tag_files_context:
-            raise Exception(f'You must have at least one markdown prompt file with the extension `.prompt.md`, `.tag.md` or a file containing `TODO:` comments in the directory {code_output_dir}.')
+            raise Exception(f'You must have at least one markdown prompt file with the extension `.prompt.md`, `.tagscript.md` or a file containing `TODO:` comments in the directory {code_output_dir}.')
         
         if prompt_files_context:
             prompt_files_context = f'{prompt_files_message}\n\n(""\n{prompt_files_context.strip()}\n"")'
