@@ -4,6 +4,8 @@
 
 Welcome to ByteBoss AI Agent! ByteBoss is a sophisticated AI-powered software designed to streamline your daily tasks and enhance productivity. Whether you are managing emails, scheduling appointments, creating multimedia content, studying for your courses, or even creating software, ByteBoss is here to assist you every step of the way.
 
+[Join Our Discord Server for Discussion](https://www.juniorit.ai/virtual-office)
+
 ## Current Features
 
 ### Software Creation
