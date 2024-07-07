@@ -21,6 +21,7 @@ Additional notes:
 - If a function or interface called does not exist, a new one should be created according to the specified input and output requirements.
 - When importing a file, its content may need to be updated to meet the specific requirements.
 - Various markdown code blocks may be used as guidelines for code creation; however, the final programming language should conform to the file extension.
+- Having example usage for each file created to demonstrate the functionality of the code if necessary.
 
 Below is an example of a tag script that generates Python code:
 
@@ -34,7 +35,7 @@ Below is an example of a tag script that generates Python code:
 @follow
 
 create a prompt with the input string, and ask LLM to output in json format
-using openai GPT-4 model by openai SDK
+using openai gpt-4o model by openai SDK
 
 @output
 ```json
@@ -73,7 +74,7 @@ class LLM:
 
         try:
             response = self.client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": \"\"\"You are a dialog generator. Generate a dialog based on the given prompt. Output should be in JSON format below:
 ```json
@@ -101,6 +102,13 @@ class LLM:
         except Exception as e:
             print(f"Error generating dialog: {str(e)}")
             raise Exception("Invalid dialog structure in the generated response")
+            
+if __name__ == "__main__":
+    # Example usage
+    llm = LLM()
+    dialog_data = llm.inference("What is the weather today?")
+    dialog_data_json = json.dumps(dialog_data, indent=4)
+    print("Generated Dialog: ", dialog_data_json)
 
 # file: main.py
 
@@ -119,4 +127,6 @@ def main():
     
     print(dialog_data)
     
+if __name__ == "__main__":
+    main()
 """
