@@ -1,3 +1,4 @@
 # Add file line by line to be ignored by the agent.
 __init__.py
 system_message.py
+tag_script_instructions.py

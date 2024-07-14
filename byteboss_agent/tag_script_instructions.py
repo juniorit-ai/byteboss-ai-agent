@@ -1,19 +1,27 @@
 TAG_SCRIPT_INSTRUCTIONS = """
 We are introducing a new scripting language named "tag script," which leverages Large Language Models (LLMs) as compilers to generate code. Below are the guidelines for writing in tag script:
 
-Each line of tag script begins with an '@' symbol, which denotes a tag. These tags serve as instructions for code generation. Here are the specific tags and their purposes:
+Each line of tag script begins or contains with an '@tag' symbol below, which denotes a tag. These tags serve as instructions for code generation. 
 
-1. @create: Creates a new code file with the specified name and language by file extension.
-2. @update: Updates an existed code file with the specified file name.
+Here are the specific tags and their purposes:
+
+1. @create `file` `[ref]`: Creates a new code file with the specified name and language by file extension, the optional `ref` can be a class name or just as a reference for this file.
+2. @update `file` `[ref]`: Updates an existed code file with the specified file name, the optional `ref` can be a class name or just as a reference for this file.
 3. @interface: Defines an interface or function with input and output requirements for other code file to import and invoke.
-4. @user: Allows the user to execute shell commands or input data.
-5. @call 'function or interface name': Invokes a specific function or interface method.
-6. @input: Inputs data from variables or files for use in the LLM model or function.
-7. @follow: Provides guidelines on how to use or create the code.
-8. @output: Specifies the data output format.
-9. @to: Saves the output to a variable or file.
-10. @import: Imports or includes the necessary library or file. If the imported file does not exist, create it as the requirements.
-11. @shell: Executes shell commands within the code. When executing shell commands, replace the placeholder `{variable}` with the corresponding input variable. If the placeholder includes the array indicator `[i]`, execute the shell command iteratively for each element in the array.
+4. @send: Sends data to an API or service.
+5. @event [from service/client]: Responds to an event or trigger from a service or client.
+6. @connect: As a clinet and connect to a server or service by a specific socket or address.
+7. @listen: Listen on a specific socket or address for incoming data in a server or service.
+8. @user: Allows the user to execute shell commands or input data.
+9. @call 'function or interface name' by {params}: Invokes a specific function or interface method.
+10. @input {params}: Inputs data from variables or files for use in the LLM model or function.
+11. @follow: Provides guidelines on how to use or create the code.
+12. @output: Specifies the data output format.
+13. @to: Saves the output to a variable, file or sends to a service.
+14. @import: Imports or includes the necessary library or file. If the imported file does not exist, create it as the requirements.
+15. @env: Using .env file to load the environment variables.
+16. @shell: Executes shell commands within the code. When executing shell commands, replace the placeholder `{variable}` with the corresponding input variable. If the placeholder includes the array indicator `[i]`, execute the shell command iteratively for each element in the array.
+17. @reference: Refers to a specific code snippet or file for reference.
 
 Additional notes:
 
@@ -30,7 +38,7 @@ Below is an example of a tag script that generates Python code:
 @create `llm.py`
 
 @interface `inference`
-@input prompt string
+@input string prompt
 
 @follow
 
