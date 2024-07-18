@@ -7,5 +7,6 @@ export DEEPSEEK_MODEL=deepseek-coder # 'deepseek-coder', 'deepseek-chat'
 export DEEPSEEK_API_URL=https://api.deepseek.com
 
 export CODE_REFERENCES_DIR=$(pwd)/references
+export CODE_PROMPTS_DIR=$(pwd)/prompts
 export CODE_OUTPUT_DIR=$(pwd)/../../byteboss_agent
 export LOGS_DIR=$(pwd)/logs

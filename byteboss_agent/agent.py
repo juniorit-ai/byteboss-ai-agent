@@ -34,6 +34,7 @@ class Agent:
         '.pl': 'perl',
         '.sql': 'sql',
         '.txt': 'text',
+        '.json': 'json'
     }
 
     @staticmethod
@@ -103,7 +104,7 @@ class Agent:
         return Agent.EXTENSION_TO_LANGUAGE.get(ext, '')
 
     @staticmethod
-    def generate_context(code_references_dir, code_output_dir, ignore_file):
+    def generate_context(code_references_dir, code_prompts_dir, code_output_dir, ignore_file):
         referenced_files_context = ''
         image_urls = []
         
@@ -149,8 +150,12 @@ class Agent:
         prompt_files_message = ''
         prompt_files_context = ''
         
+        # Read prompt files from CODE_PROMPTS_DIR
+        ignore_list = Agent.load_ignore_list(os.path.join(code_prompts_dir, ignore_file))
+        prompt_files, _ = Agent.read_files_in_directory(code_prompts_dir, ignore_list)
+        prompt_files = {fp: c for fp, c in prompt_files.items() if fp.endswith('.prompt.md')}
+        
         # Combine all the *.prompt.md files content together and show it, just separate by line
-        prompt_files = {fp: c for fp, c in output_files.items() if fp.endswith('.prompt.md')}
         if prompt_files:
             if not files_with_todo_context:
                 prompt_files_message = 'Please complete the task as per the instructions below:'
@@ -164,7 +169,7 @@ class Agent:
         tag_files_context = ''
         
         # Combine all the *.tagscript.md files content together and show it, just separate by line
-        tag_files = {fp: c for fp, c in output_files.items() if fp.endswith('.tagscript.md')}
+        tag_files = {fp: c for fp, c in prompt_files.items() if fp.endswith('.tagscript.md')}
         if tag_files:
             if not files_with_todo_context and not prompt_files_context:
                 tag_files_message = f'{TAG_SCRIPT_INSTRUCTIONS}\n\nPlease complete the code as per the below tag script content:'
@@ -175,7 +180,7 @@ class Agent:
                 tag_files_context += f'{content}\n\n'
                 
         if not files_with_todo_context and not prompt_files_context and not tag_files_context:
-            raise Exception(f'You must have at least one markdown prompt file with the extension `.prompt.md`, `.tagscript.md` or a file containing `TODO:` comments in the directory {code_output_dir}.')
+            raise Exception(f'You must have at least one markdown prompt file with the extension `.prompt.md`, `.tagscript.md` or a file containing `TODO:` comments in the directory {code_prompts_dir}.')
         
         if prompt_files_context:
             prompt_files_context = f'{prompt_files_message}\n\n(""\n{prompt_files_context.strip()}\n"")'

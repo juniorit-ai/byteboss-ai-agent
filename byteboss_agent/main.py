@@ -27,7 +27,11 @@ def main():
             return
     
     code_references_dir = os.getenv('CODE_REFERENCES_DIR', '../code-references')
+    code_prompts_dir = os.getenv('CODE_PROMPTS_DIR', '../code-prompts')
     code_output_dir = os.getenv('CODE_OUTPUT_DIR', '../code-output')
+    if code_prompts_dir is None:
+        code_prompts_dir = code_output_dir
+        
     ignore_file = 'ignore-by-agent.txt'
     
     if llm_provider == 'openai':
@@ -42,7 +46,7 @@ def main():
         print(f"Unsupported LLM provider: {llm_provider}")
         return
     
-    context, image_urls = Agent.generate_context(code_references_dir, code_output_dir, ignore_file)
+    context, image_urls = Agent.generate_context(code_references_dir, code_prompts_dir, code_output_dir, ignore_file)
     #print("Generated context for AI:\n", context)
     
     ai_output, messages = llm.get_ai_code_files(context, image_urls)
