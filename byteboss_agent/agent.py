@@ -1,5 +1,6 @@
 import os
 import base64
+import yaml
 from tag_script_instructions import TAG_SCRIPT_INSTRUCTIONS
 
 def get_relative_path(root_path, full_path):
@@ -34,7 +35,8 @@ class Agent:
         '.pl': 'perl',
         '.sql': 'sql',
         '.txt': 'text',
-        '.json': 'json'
+        '.json': 'json',
+        '.yaml': 'yaml',
     }
 
     @staticmethod
@@ -187,7 +189,35 @@ class Agent:
             
         if tag_files_context:
             tag_files_context = f'{tag_files_message}\n\n(""\n{tag_files_context.strip()}\n"")'
+            
         
-        context = referenced_files_context + output_files_context + files_with_todo_context + prompt_files_context + tag_files_context
+        reference_packages_content = ''
+        
+        packages_yaml_path = os.path.join(code_prompts_dir, 'packages.yaml')
+        if os.path.exists(packages_yaml_path):
+            with open(packages_yaml_path, 'r') as f:
+                packages_data = yaml.safe_load(f)
+            
+            packages = []
+            if isinstance(packages_data, list):
+                packages = packages_data
+            elif isinstance(packages_data, dict):
+                packages = [packages_data]
+            
+            if packages:
+                reference_packages_content = f'There are total {sum(len(pkg_list) for lang_pkg in packages for pkg_list in lang_pkg.values())} packages for you to reference when you are writing code\n\n'
+                
+                package_count = 1
+                for lang_pkg in packages:
+                    for language, pkg_list in lang_pkg.items():
+                        for package in pkg_list:
+                            package_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'packages', language, f'{package}.md')
+                            if os.path.exists(package_file_path):
+                                with open(package_file_path, 'r') as f:
+                                    content = f.read()
+                                reference_packages_content += f'Package-{package_count}: {package} in {language}, \n\n(""\n{content}\n"")\n\n'
+                                package_count += 1
+        
+        context = referenced_files_context + reference_packages_content + output_files_context + files_with_todo_context + prompt_files_context + tag_files_context
         
         return context, image_urls
