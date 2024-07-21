@@ -67,6 +67,7 @@ class LLMOpenAI(LLMInterface):
         print(f"Received from LLM {api_invoke_times}")
 
         if response.choices[0].finish_reason == 'length':
+            print(response.choices[0].message.content)
             raise  Exception(f"Max completion tokens ({response.usage.completion_tokens}) limit reached, please refine your prompt to make the output shorter.")
         
         #save the raw output to a file

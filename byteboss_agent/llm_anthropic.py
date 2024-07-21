@@ -66,6 +66,7 @@ class LLMAnthropic(LLMInterface):
         print(f"Received from LLM {api_invoke_times}")
 
         if response.stop_reason == 'max_tokens':
+            print(response.content[0].text)
             raise  Exception(f"Max completion tokens ({response.usage.completion_tokens}) limit reached, please refine your prompt to make the output shorter.")
         
         #save the raw output to a file
