@@ -38,6 +38,8 @@ def main():
         llm = LLMOpenAI(api_key, os.getenv('OPENAI_MODEL', 'gpt-4o-2024-05-13'))
     elif llm_provider == 'deepseek':
         llm = LLMOpenAI(api_key, os.getenv('DEEPSEEK_MODEL', 'deepseek-coder'), os.getenv('DEEPSEEK_API_URL', 'https://api.deepseek.com'))
+    elif llm_provider == 'octoai':
+        llm = LLMOpenAI(api_key, os.getenv('OCTOAI_MODEL', 'meta-llama-3.1-70b-instruct'), os.getenv('OCTOAI_API_URL', 'https://text.octoai.run/v1'))
     elif llm_provider == 'juniorit':
         llm = LLMOpenAI(api_key, 'juniorit', 'https://juniorit.ai/rest/llm')
     elif llm_provider == 'anthropic':
