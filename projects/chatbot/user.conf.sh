@@ -1,4 +1,4 @@
-export LLM_PROVIDER=octoai  # 'deepseek', 'openai', 'anthropic', 'octoai'
+export LLM_PROVIDER=deepseek  # 'deepseek', 'openai', 'anthropic', 'octoai'
 
 export OPENAI_MODEL=gpt-4o-2024-05-13
 export ANTHROPIC_MODEL=claude-3-5-sonnet-20240620

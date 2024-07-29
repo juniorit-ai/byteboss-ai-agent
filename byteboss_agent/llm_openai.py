@@ -56,10 +56,14 @@ class LLMOpenAI(LLMInterface):
         print(f"Sent to LLM {api_invoke_times}")
 
         #quit()
+        
+        response_format = {"type": "json_object"}
+        if "llama" in self.model:
+            response_format=None
 
         response = self.client.chat.completions.create(
             model=self.model,
-            response_format={"type": "json_object"},
+            response_format=response_format,
             messages=messages,
             stream=False,
         )
