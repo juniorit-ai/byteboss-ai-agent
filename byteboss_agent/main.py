@@ -52,13 +52,13 @@ def main():
     #print("Generated context for AI:\n", context)
     
     ai_output, messages = llm.get_ai_code_files(context, image_urls)
-    #print("\nAI Output:\n", ai_output)
+    #print("AI Output:\n", ai_output)
     
     json_data = json.loads(ai_output)
     
     if 'files' in json_data['agentOutput']:
         Executor.update_files_from_json(json_data, code_output_dir)
-        print("\git comments provided by AI:\n", json_data["agentOutput"]["gitComments"])
+        print("git comments provided by AI:\n", json_data["agentOutput"]["gitComments"])
         # exit program, we only do once for image to code conversion
     else:
         for file in json_data["agentOutput"]["instruction"]:
@@ -84,11 +84,11 @@ def main():
                     error_message = f"{user_response}\n\n{setup_result}"
                     
                 ai_output = llm.get_ai_error_fix(messages, error_message)
-                print("\nAI Retry Output:\n", ai_output)
+                print("AI Retry Output:\n", ai_output)
                 
                 json_data = json.loads(ai_output)
                 if "gitComments" in json_data["agentOutput"]:
-                    print("\git comments provided by AI:\n", json_data["agentOutput"]["gitComments"])
+                    print("git comments provided by AI:\n", json_data["agentOutput"]["gitComments"])
 
                 if(json_data["agentOutput"]["files"]):
                     Executor.update_files_from_json(json_data, code_output_dir)
@@ -113,11 +113,11 @@ def main():
                     error_message = f"{user_response}\n\n{command_result}"
                     
                 ai_output = llm.get_ai_error_fix(messages, error_message)
-                print("\nAI Retry Output:\n", ai_output)
+                print("AI Retry Output:\n", ai_output)
                 
                 json_data = json.loads(ai_output)
                 if "gitComments" in json_data["agentOutput"]:
-                    print("\git comments provided by AI:\n", json_data["agentOutput"]["gitComments"])
+                    print("git comments provided by AI:\n", json_data["agentOutput"]["gitComments"])
     
                 if(json_data["agentOutput"]["files"]):
                     Executor.update_files_from_json(json_data, code_output_dir)
