@@ -64,29 +64,34 @@ class LLMOpenAI(LLMInterface):
             response_format=None
         if is_file:
             stop = '<|stop|>'
-
-        response = self.client.chat.completions.create(
-            model=self.model,
-            response_format=response_format,
-            messages=messages,
-            stop=stop,
-            stream=False,
-        )
+            
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                response_format=response_format,
+                messages=messages,
+                stop=stop,
+                stream=False,
+            )
+        except Exception as e:
+            print(messages)
+            print(f"Error: {e}")
+            raise e
 
         print(f"Received from LLM {api_invoke_times}")
-
-        if response.choices[0].finish_reason == 'length':
-            print(response.choices[0].message.content)
-            if is_file:
-                print("Max completion tokens ({response.usage.completion_tokens}) limit reached, we will try to get the rest of the output.")
-                return False, response.choices[0].message.content, messages
-            raise  Exception(f"Max completion tokens ({response.usage.completion_tokens}) limit reached, please refine your prompt to make the output shorter.")
         
         #save the raw output to a file
         if logs_dir is not None:
             with open(os.path.join(logs_dir, f"output_raw_{api_invoke_times}.log"), "w") as f:
                 f.write(response.choices[0].message.content)
-                
+
+        if response.choices[0].finish_reason == 'length':
+            print(response.choices[0].message.content)
+            if is_file:
+                print(f"Max completion tokens ({response.usage.completion_tokens}) limit reached, we will try to get the rest of the output.")
+                return False, response.choices[0].message.content, messages
+            raise  Exception(f"Max completion tokens ({response.usage.completion_tokens}) limit reached, please refine your prompt to make the output shorter.")
+
         if is_file:
             content = re.sub(r"<\|start-content\|>\n?", "", response.choices[0].message.content)
             last_element = messages[-1]
@@ -160,9 +165,9 @@ class LLMOpenAI(LLMInterface):
             messages.pop()
             if last_element["role"] == "user":
                 messages.append({"role": "user", "content": f"Please {action_type} file {filepath} as the summary {summary}, and refer to all the chat history.\n\n{UPDATE_FILE_GUIDELINES_PARTIAL_TEXT}"})
-                messages.append({"role": "assistant", "content": content})
+                messages.append({"role": "assistant", "content": content.strip()})
             else:
-                messages.append({"role": "assistant", "content": last_element['content'] + content})
+                messages.append({"role": "assistant", "content": (last_element['content'] + content).strip()})
             returned_values = self.get_ai_response(messages, True)
             number_of_values = len(returned_values) if isinstance(returned_values, tuple) else 1
             max_retries -= 1
