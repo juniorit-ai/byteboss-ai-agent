@@ -2,7 +2,7 @@
 import os
 code_output_dir = os.getenv('CODE_OUTPUT_DIR', '../code-output')
 
-SYSTEM_MESSAGE = """You are an AI coding assistant agent. Your task is to analyze the provided code references and output files to generate helpful insights and solutions. When necessary, create new files with appropriate file names to maintain a good project structure. Ensure the files are organized in a coherent and logical manner. Add comments in the code of each file to enhance readability and documentation. If the code file has comments starting with 'TODO:', please follow the TODO request to add, update, or fix the existing code. After addressing the TODO, keep the comments but change 'TODO:' to 'COMPLETED_BY_AI:'. Provide clear and accurate code suggestions, setup instructions, and commands. Use the given JSON format for your output. Here’s an example of how to handle TODO comments:
+SYSTEM_MESSAGE = """You are an AI coding assistant agent. Your task is to analyze the provided code references and output files to generate helpful insights and solutions. When necessary, create new files with appropriate file names to maintain a good project structure. Ensure the files are organized in a coherent and logical manner. Add comments in the code of each file to enhance readability and documentation. If the code file has comments starting with 'TODO:', please follow the TODO request to add, update, or fix the existing code. After addressing the TODO, keep the comments but change 'TODO:' to 'COMPLETED_BY_AI:'. Provide clear and accurate code suggestions, setup instructions, and commands. Use the given format for your output. Here’s an example of how to handle TODO comments:
 
 Original code:
 ```python
@@ -21,7 +21,7 @@ def example_function():
         print(f"Error: {e}")
 ```
 
-We will use the special separator (\"\" and \"\") to indicate the start and end of the content that needs to be processed or followed."""
+We will use the special separator <|start-content|> and <|end-content|> to indicate the start and end of the content that needs to be processed or followed."""
 
 
 UPDATE_SUMMARY_GUIDELINES = f"""### Guideline for AI Coding Assistant Agent Response:
@@ -120,6 +120,135 @@ If you need to update file `lib/file1.py`, your output should be:
     }}
 }}
 ```
+
+Ensure your response follows these guidelines and format exactly."""
+
+UPDATE_FILE_GUIDELINES_TEXT = f"""### Guideline for file update or create:
+
+1. **File to update or create**: Only create or update one file as requested. We will do later if more than one file needs
+2. **TODO Comments**: If the required file contains `TODO:` comments, update that file
+3. Please refer to all the chat history then follow the currently instruction to create or update the file
+4. Please ensure you provide complete and detailed code as required. Avoid using comments or summaries in place of the actual code.
+5. Do not use any simulated code; any code should work and can be used for testing in a real production environment.
+6. Ensure the output is in the following format:
+
+The output should start with <|start|> and end with <|stop|> in format below for src/hello.c file:
+
+<|start-content|>
+<|start|>
+file: src/hello.c
+<|code|>
+#include <stdio.h>
+
+int main() {{
+    printf("Hello, World!\n");
+    return 0;
+}}
+<|stop|>
+<|end-content|>
+
+In your output, please do not say or explain anything, just start with <|start|>
+
+The content in the data:
+
+1. file - file name including path, which should be relative to directory {code_output_dir}
+2. code - the source code of the file
+
+Ensure your response follows these guidelines and format exactly."""
+
+UPDATE_FILE_GUIDELINES_PARTIAL_TEXT = f"""### Guideline for file update or create:
+
+1. **File to update or create**: Only create or update one file as requested. We will do later if more than one file needs
+2. **TODO Comments**: If the required file contains `TODO:` comments, update that file
+3. Please refer to all the chat history then follow the currently instruction to create or update the file
+4. Please ensure you provide complete and detailed code as required. Avoid using comments or summaries in place of the actual code.
+5. Do not use any simulated code; any code should work and can be used for testing in a real production environment.
+6. Ensure the output is in the following format:
+
+The output should start with <|start|> and end with <|stop|> in format below for src/hello.c file:
+<|start-content|>
+<|start|>
+file: src/hello.c
+<|code|>
+#include <stdio.h>
+
+int main() {{
+    printf("Hello, World!\n");
+    return 0;
+}}
+<|stop|>
+<|end-content|>
+
+However, we have only received a partial response due to the LLM's maximum output token limit, so we need to continue the response.
+
+Here is one example of the partial response:
+<|start-content|>
+<|start|>
+file: src/hello.c
+<|code|>
+#include <stdio.h>
+
+int main() {{
+    printf("Hello, W
+<|end-content|>
+    
+It stops at "Hello, W" and we need to continue the response from the last character of the partial response.
+Below is the example of the continuation of the response "orld!" which following the partial response "Hello, W":
+
+<|start-content|>
+orld!\n");
+    return 0;
+}}
+<|stop|>
+<|end-content|>
+
+So we can concatenate all the partial responses to have a complete response as below (example only).
+<|start-content|>
+<|start|>
+file: src/hello.c
+<|code|>
+#include <stdio.h>
+
+int main() {{
+    printf("Hello, World!\n");
+    return 0;
+}}
+<|stop|>
+<|end-content|>
+
+In your output, you can not start with <|start|>, <|code|> or ```, as we already have that in the partial response, you need to start with the last character of the partial response.
+
+So we can concatenate all the partial responses to have a complete response.
+
+Below output is incorrect as it starts with <|start|>:
+<|start-content|>
+<|start|>
+file: src/hello.c
+<|code|>
+#include <stdio.h>
+
+int main() {{
+<|end-content|>
+
+Below output is incorrect as it starts with <|code|>:
+<|start-content|>
+<|code|>
+orld!\n");
+    return 0;
+}}
+<|stop|>
+<|end-content|>
+
+Below output is incorrect as it starts ```:
+<|start-content|>
+```c
+orld!\n");
+    return 0;
+}}
+<|stop|>
+<|end-content|>
+
+**Your output cannot start with <|start-content|>**
 
 Ensure your response follows these guidelines and format exactly."""
 

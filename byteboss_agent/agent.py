@@ -117,7 +117,7 @@ class Agent:
             referenced_files_context += f'There are total {len(reference_files)} files for you to reference only (it is not allowed to update these files, also do not mention it in any document file)\n\n'
             for i, (file_path, content) in enumerate(reference_files.items(), start = 1):
                 language = Agent.get_language_by_extension(file_path)
-                referenced_files_context += f'File-{i} in {language}, path: {get_relative_path(code_references_dir, file_path)}\n\n(""\n{content}\n"")\n\n'
+                referenced_files_context += f'File-{i} in {language}, path: {get_relative_path(code_references_dir, file_path)}\n\n<|start-content|>\n{content}\n<|end-content|>\n\n'
         
         if ref_image_urls:
             image_urls.extend(ref_image_urls)
@@ -138,13 +138,13 @@ class Agent:
                 output_files_context += f'There are total {len(non_todo_files)} files for you to check (do not contain {T2DO} comments), you may need to update it if it is necessary\n\n'
                 for i, (file_path, content) in enumerate(non_todo_files.items(), start=1):
                     language = Agent.get_language_by_extension(file_path)
-                    output_files_context += f'File-{i} in {language}, path: {get_relative_path(code_output_dir, file_path)}\n\n(""\n{content}\n"")\n\n'
+                    output_files_context += f'File-{i} in {language}, path: {get_relative_path(code_output_dir, file_path)}\n\n<|start-content|>\n{content}\n<|end-content|>\n\n'
             
             if todo_files:
                 files_with_todo_context += f'There are total {len(todo_files)} files which contain {T2DO}: comments, please follow the {T2DO} requirement to update these files and other related files if necessary\n\n'
                 for i, (file_path, content) in enumerate(todo_files.items(), start=1):
                     language = Agent.get_language_by_extension(file_path)
-                    files_with_todo_context += f'File-{i} in {language}, path: {get_relative_path(code_output_dir, file_path)}\n\n(""\n{content}\n"")\n\n'
+                    files_with_todo_context += f'File-{i} in {language}, path: {get_relative_path(code_output_dir, file_path)}\n\n<|start-content|>\n{content}\n<|end-content|>\n\n'
 
         if out_image_urls:
             image_urls.extend(out_image_urls)
@@ -185,10 +185,10 @@ class Agent:
             raise Exception(f'You must have at least one markdown prompt file with the extension `.prompt.md`, `.tagscript.md` or a file containing `TODO:` comments in the directory {code_prompts_dir}.')
         
         if prompt_files_context:
-            prompt_files_context = f'{prompt_files_message}\n\n(""\n{prompt_files_context.strip()}\n"")'
+            prompt_files_context = f'{prompt_files_message}\n\n<|start-content|>\n{prompt_files_context.strip()}\n<|end-content|>'
             
         if tag_files_context:
-            tag_files_context = f'{tag_files_message}\n\n(""\n{tag_files_context.strip()}\n"")'
+            tag_files_context = f'{tag_files_message}\n\n<|start-content|>\n{tag_files_context.strip()}\n<|end-content|>'
             
         
         reference_packages_content = ''
@@ -215,7 +215,7 @@ class Agent:
                             if os.path.exists(package_file_path):
                                 with open(package_file_path, 'r') as f:
                                     content = f.read()
-                                reference_packages_content += f'Package-{package_count}: {package} in {language}, \n\n(""\n{content}\n"")\n\n'
+                                reference_packages_content += f'Package-{package_count}: {package} in {language}, \n\n<|start-content|>\n{content}\n<|end-content|>\n\n'
                                 package_count += 1
         
         context = referenced_files_context + reference_packages_content + output_files_context + files_with_todo_context + prompt_files_context + tag_files_context

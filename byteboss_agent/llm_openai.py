@@ -5,11 +5,62 @@ import json
 from json_repair import repair_json
 import yaml
 from llm_interface import LLMInterface
-from system_message import SYSTEM_MESSAGE, UPDATE_SUMMARY_GUIDELINES, UPDATE_FILE_GUIDELINES, IMAGE_TO_CODE_GUIDELINES, EXECUTE_COMMANDS_GUIDELINES, ERROR_FIX_GUIDELINES
+from system_message import SYSTEM_MESSAGE, UPDATE_SUMMARY_GUIDELINES, UPDATE_FILE_GUIDELINES, IMAGE_TO_CODE_GUIDELINES, EXECUTE_COMMANDS_GUIDELINES, ERROR_FIX_GUIDELINES, UPDATE_FILE_GUIDELINES_TEXT, UPDATE_FILE_GUIDELINES_PARTIAL_TEXT
 
 api_invoke_times = 0
 
 logs_dir = os.getenv('LOGS_DIR')
+
+"""
+<|start|> 
+file: src/hello.c 
+<|code|>
+#include <stdio.h>
+int main() {
+    printf("Hello, World!\\n");
+    return 0;
+}
+<|stop|>
+"""
+
+def convert_to_json(content):
+    # Remove leading/trailing whitespace and split the content into lines
+    lines = content.strip().split('\n')
+    
+    # Extract file path
+    file_line = next((line for line in lines if line.strip().startswith('file:')), None)
+    if not file_line:
+        return "Error: File path not found"
+    
+    filepath = file_line.split('file:', 1)[1].strip()
+    
+    # Find the start of the code
+    code_start = next((i for i, line in enumerate(lines) if '<|code|>' in line), -1)
+    if code_start == -1:
+        return "Error: Code start not found"
+    
+    # Extract code content
+    code_lines = lines[code_start + 1:]
+    
+    # Find the end of the code (if <|stop|> exists)
+    code_end = next((i for i, line in enumerate(code_lines) if '<|sto' in line), len(code_lines))
+    
+    # Join the code lines
+    code = '\n'.join(code_lines[:code_end]).strip()
+    
+    # Create the JSON structure
+    json_data = {
+        "agentOutput": {
+            "file": {
+                "filepath": filepath,
+                "code": code
+            }
+        }
+    }
+    
+    # Convert to JSON string
+    json_string = json.dumps(json_data, indent=2)
+    return json_string
 
 # Define a custom representer for long strings
 def str_presenter(dumper, data):
@@ -40,7 +91,7 @@ class LLMOpenAI(LLMInterface):
         self.client = OpenAI(api_key = api_key, base_url = base_url)
         self.model = model
         
-    def get_ai_response(self, messages):
+    def get_ai_response(self, messages, is_file=False):
         global api_invoke_times 
         
         api_invoke_times = api_invoke_times + 1
@@ -58,13 +109,18 @@ class LLMOpenAI(LLMInterface):
         #quit()
         
         response_format = {"type": "json_object"}
-        if "llama" in self.model:
+        stop = None
+        
+        if "llama" in self.model or is_file:
             response_format=None
+        if is_file:
+            stop = '<|stop|>'
 
         response = self.client.chat.completions.create(
             model=self.model,
             response_format=response_format,
             messages=messages,
+            stop=stop,
             stream=False,
         )
 
@@ -72,15 +128,28 @@ class LLMOpenAI(LLMInterface):
 
         if response.choices[0].finish_reason == 'length':
             print(response.choices[0].message.content)
+            if is_file:
+                print("Max completion tokens ({response.usage.completion_tokens}) limit reached, we will try to get the rest of the output.")
+                return False, response.choices[0].message.content, messages
             raise  Exception(f"Max completion tokens ({response.usage.completion_tokens}) limit reached, please refine your prompt to make the output shorter.")
         
         #save the raw output to a file
         if logs_dir is not None:
             with open(os.path.join(logs_dir, f"output_raw_{api_invoke_times}.log"), "w") as f:
                 f.write(response.choices[0].message.content)
-
-        assistant_message = remove_json_markdown_block_signs(response.choices[0].message.content)
-        assistant_message = repair_json(assistant_message)
+                
+        if is_file:
+            content = re.sub(r"<\|start-content\|>\n?", "", response.choices[0].message.content)
+            last_element = messages[-1]
+            if last_element["role"] == "assistant":
+                messages.pop()
+                content = last_element['content'] + content
+            assistant_message = convert_to_json(content)
+                
+        else:
+            assistant_message = remove_json_markdown_block_signs(response.choices[0].message.content)
+            assistant_message = repair_json(assistant_message)
+            
         json_data = json.loads(assistant_message)
         json_data_str = yaml.dump(json_data, allow_unicode=True, default_flow_style=False, width=4096)
 
@@ -130,7 +199,29 @@ class LLMOpenAI(LLMInterface):
         filepath = file["filepath"]
         summary = file["summary"]
         messages.append({"role": "user", "content": f"Please {action_type} file {filepath} as the summary {summary}, and refer to all the chat history.\n\n{UPDATE_FILE_GUIDELINES}"})
-        return self.get_ai_response(messages)
+        returned_values = self.get_ai_response(messages, True)
+        number_of_values = len(returned_values) if isinstance(returned_values, tuple) else 1
+        
+        max_retries = 5
+        
+        while number_of_values == 3 and max_retries > 0:
+            _, content, messages = returned_values
+            content = re.sub(r"<\|start-content\|>\n?", "", content)
+            last_element = messages[-1]
+            messages.pop()
+            if last_element["role"] == "user":
+                messages.append({"role": "user", "content": f"Please {action_type} file {filepath} as the summary {summary}, and refer to all the chat history.\n\n{UPDATE_FILE_GUIDELINES_PARTIAL_TEXT}"})
+                messages.append({"role": "assistant", "content": content})
+            else:
+                messages.append({"role": "assistant", "content": last_element['content'] + content})
+            returned_values = self.get_ai_response(messages, True)
+            number_of_values = len(returned_values) if isinstance(returned_values, tuple) else 1
+            max_retries -= 1
+        
+        if number_of_values == 3:
+            raise Exception("Max retries reached, please refine your prompt to make the output shorter.")
+        
+        return returned_values
 
     def get_ai_shell_commands(self, messages):
         messages.append({"role": "user", "content": f"Please check and give all the shell commans may be used in the context.\n\n{EXECUTE_COMMANDS_GUIDELINES}"})
