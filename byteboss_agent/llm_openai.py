@@ -198,7 +198,7 @@ class LLMOpenAI(LLMInterface):
         action_type = file["action_type"]
         filepath = file["filepath"]
         summary = file["summary"]
-        messages.append({"role": "user", "content": f"Please {action_type} file {filepath} as the summary {summary}, and refer to all the chat history.\n\n{UPDATE_FILE_GUIDELINES}"})
+        messages.append({"role": "user", "content": f"Please {action_type} file {filepath} as the summary {summary}, and refer to all the chat history.\n\n{UPDATE_FILE_GUIDELINES_TEXT}"})
         returned_values = self.get_ai_response(messages, True)
         number_of_values = len(returned_values) if isinstance(returned_values, tuple) else 1
         
