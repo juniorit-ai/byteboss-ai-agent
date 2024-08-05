@@ -34,7 +34,7 @@ class LLMInterface(ABC):
     <|stop|>
     """
 
-    def file_info_to_json(content):
+    def file_info_to_json(self, content):
         # Remove leading/trailing whitespace and split the content into lines
         lines = content.strip().split('\n')
 
