@@ -98,11 +98,12 @@ class LLMOpenAI(LLMInterface):
             if last_element["role"] == "assistant":
                 messages.pop()
                 content = last_element['content'] + content
-            assistant_message = self.file_info_to_json(content)
-                
+            messages.append({"role": "assistant", "content": content})
+            assistant_message = self.file_info_to_json(content)     
         else:
             assistant_message = remove_json_markdown_block_signs(response.choices[0].message.content)
             assistant_message = repair_json(assistant_message)
+            messages.append({"role": "assistant", "content": assistant_message})
             
         json_data = json.loads(assistant_message)
         json_data_str = yaml.dump(json_data, allow_unicode=True, default_flow_style=False, width=4096)
@@ -112,7 +113,6 @@ class LLMOpenAI(LLMInterface):
             with open(os.path.join(logs_dir, f"output_{api_invoke_times}.log"), "w") as f:
                 f.write(json_data_str)
         
-        messages.append({"role": "assistant", "content": assistant_message})
         return assistant_message, messages
 
 
