@@ -192,6 +192,17 @@ class Agent:
             
         
         reference_packages_content = ''
+        '''
+        python:
+            - package1
+            - package2
+
+        or 
+
+        - python:
+            - package1
+            - package2
+        '''
         
         packages_yaml_path = os.path.join(code_prompts_dir, 'packages.yaml')
         if os.path.exists(packages_yaml_path):
