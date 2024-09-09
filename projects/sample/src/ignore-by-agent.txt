@@ -1,1 +1,2 @@
 # Add file line by line to be ignored by the agent.
+node_modules
