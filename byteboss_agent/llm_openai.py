@@ -78,6 +78,7 @@ class LLMOpenAI(LLMInterface):
                 model=self.model,
                 response_format=response_format,
                 messages=messages,
+                max_tokens=max_tokens,
                 stop=stop,
                 stream=False,
             )
