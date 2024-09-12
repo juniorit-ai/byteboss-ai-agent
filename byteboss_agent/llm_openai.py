@@ -33,11 +33,14 @@ def remove_json_markdown_block_signs(markdown_string: str) -> str:
         return markdown_string  # Return input if no JSON block is found
 
 class LLMOpenAI(LLMInterface):
+    base_url = None
     client = None
     model = None
     
     def __init__(self, api_key,  model, base_url=None):
-        self.client = OpenAI(api_key = api_key, base_url = base_url)
+        self.base_url = base_url
+        
+        self.client = OpenAI(api_key = api_key, base_url = self.base_url)
         self.model = model
         
     def get_ai_response(self, messages, is_file=False):
