@@ -56,12 +56,17 @@ class LLMOpenAI(LLMInterface):
         print(f"Sent to LLM {api_invoke_times}")
 
         #quit()
+        max_tokens = 4096
         
         response_format = {"type": "json_object"}
         stop = None
         
+        if self.base_url and "api.deepseek.com/beta" in self.base_url:
+            max_tokens = 8192
+        
         if "llama" in self.model or is_file:
             response_format=None
+            
         if is_file:
             stop = '<|stop|>'
             
