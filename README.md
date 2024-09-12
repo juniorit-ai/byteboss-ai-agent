@@ -6,6 +6,15 @@ Welcome to ByteBoss AI Agent! ByteBoss is a sophisticated AI-powered software de
 
 [Join Our Discord Server for Discussion](https://www.juniorit.ai/virtual-office)
 
+## Setup
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip3 install -r requirements.txt
+# then refer to file user_manual.md
+```
+
 ## Current Features
 
 ### Software Creation

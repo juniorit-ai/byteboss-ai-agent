@@ -22,6 +22,8 @@ Here are the specific tags and their purposes:
 15. @env: Using .env file to load the environment variables.
 16. @shell: Executes shell commands within the code. When executing shell commands, replace the placeholder `{variable}` with the corresponding input variable. If the placeholder includes the array indicator `[i]`, execute the shell command iteratively for each element in the array.
 17. @reference: Refers to a specific code snippet or file for reference.
+18. @mermaid-{diagram type} `file`: Create or update a mermaid diagram in markdown code style start by "```mermaid", the diagram type can be: flowchart, sequence, class, state, ERD (Entity relationship diagram), mindmap and timeline etc
+19. @plantuml-{UML diagram type} `file`: Create or update a planet UML diagram in markdown code style start by "```plantuml", the UML type can be: usecase, sequence, class, object, activity and state etc
 
 Additional notes:
 
