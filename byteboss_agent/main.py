@@ -48,10 +48,10 @@ def main():
         print(f"Unsupported LLM provider: {llm_provider}")
         return
     
-    context, image_urls = Agent.generate_context(code_references_dir, code_prompts_dir, code_output_dir, ignore_file)
+    context, image_urls, original_prompts = Agent.generate_context(code_references_dir, code_prompts_dir, code_output_dir, ignore_file)
     #print("Generated context for AI:\n", context)
     
-    ai_output, messages = llm.get_ai_code_files(context, image_urls)
+    ai_output, messages = llm.get_ai_code_files(context, image_urls, original_prompts)
     #print("AI Output:\n", ai_output)
     
     json_data = json.loads(ai_output)

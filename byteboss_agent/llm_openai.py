@@ -43,7 +43,7 @@ class LLMOpenAI(LLMInterface):
         self.client = OpenAI(api_key = api_key, base_url = self.base_url)
         self.model = model
         
-    def get_ai_response(self, messages, is_file=False):
+    def get_ai_response(self, messages, is_file=False, original_prompts=[]):
         global api_invoke_times 
         
         api_invoke_times = api_invoke_times + 1
@@ -73,6 +73,9 @@ class LLMOpenAI(LLMInterface):
         if is_file:
             stop = '<|stop|>'
             
+        if self.model != 'juniorit':
+            original_prompts = None
+            
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -81,6 +84,7 @@ class LLMOpenAI(LLMInterface):
                 max_tokens=max_tokens,
                 stop=stop,
                 stream=False,
+                original_prompts=original_prompts
             )
         except Exception as e:
             print(messages)
@@ -125,7 +129,7 @@ class LLMOpenAI(LLMInterface):
         return assistant_message, messages
 
 
-    def get_ai_code_files(self, context, image_urls=[]):
+    def get_ai_code_files(self, context, image_urls=[], original_prompts=[]):
 
         prompt_str = f"{context}"
         
@@ -155,7 +159,7 @@ class LLMOpenAI(LLMInterface):
             messages.append({"role": "user", "content": prompt_str})
         
 
-        return self.get_ai_response(messages)
+        return self.get_ai_response(messages, original_prompts=original_prompts)
     
     def get_ai_file_update(self, messages, file):
         action_type = file["action_type"]

@@ -3,11 +3,11 @@ import json
 
 class LLMInterface(ABC):
     @abstractmethod
-    def get_ai_response(self, messages):
+    def get_ai_response(self, messages, is_file=False, original_prompts=[]):
         pass
     
     @abstractmethod
-    def get_ai_code_files(self, context, image_urls):
+    def get_ai_code_files(self, context, image_urls=[], original_prompts=[]):
         pass
 
     @abstractmethod

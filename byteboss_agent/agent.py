@@ -53,7 +53,10 @@ class Agent:
     @staticmethod
     def should_ignore(file_path, ignore_list):
         for ignore_item in ignore_list:
-            if ignore_item in file_path:
+            if ignore_item == 'ALL':
+                return True
+            ignore_dir = os.path.join(ignore_item, '')  # Adds trailing slash for directory check
+            if ignore_dir in file_path:
                 return True
             if file_path.endswith(ignore_item):
                 return True
@@ -152,6 +155,8 @@ class Agent:
         prompt_files_message = ''
         prompt_files_context = ''
         
+        original_prompts = []
+        
         # Read prompt files from CODE_PROMPTS_DIR
         ignore_list = Agent.load_ignore_list(os.path.join(code_prompts_dir, ignore_file))
         prompt_files, _ = Agent.read_files_in_directory(code_prompts_dir, ignore_list)
@@ -165,6 +170,7 @@ class Agent:
                 prompt_files_message = 'In Addition, please complete the task as per the instructions below:'
                 
             for file_path, content in prompt_files.items():
+                original_prompts.append(content)
                 prompt_files_context += f'{content}\n\n'
             
         tag_files_message = ''
@@ -179,6 +185,7 @@ class Agent:
                 tag_files_message = 'In Addition, {TAG_SCRIPT_INSTRUCTIONS}\n\nPlease complete the code as per the below tag script content:'
                 
             for file_path, content in tag_files.items():
+                original_prompts.append(content)
                 tag_files_context += f'{content}\n\n'
                 
         if not files_with_todo_context and not prompt_files_context and not tag_files_context:
@@ -231,4 +238,4 @@ class Agent:
         
         context = referenced_files_context + reference_packages_content + output_files_context + files_with_todo_context + prompt_files_context + tag_files_context
         
-        return context, image_urls
+        return context, image_urls, original_prompts
