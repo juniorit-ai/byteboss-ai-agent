@@ -77,15 +77,25 @@ class LLMOpenAI(LLMInterface):
             original_prompts = None
             
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                response_format=response_format,
-                messages=messages,
-                max_tokens=max_tokens,
-                stop=stop,
-                stream=False,
-                extra_body={"original_prompts": original_prompts}
-            )
+            if original_prompts is None:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    response_format=response_format,
+                    messages=messages,
+                    max_tokens=max_tokens,
+                    stop=stop,
+                    stream=False
+                )
+            else:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    response_format=response_format,
+                    messages=messages,
+                    max_tokens=max_tokens,
+                    stop=stop,
+                    stream=False,
+                    extra_body={"original_prompts": original_prompts}
+                )
         except Exception as e:
             print(messages)
             print(f"Error: {e}")
