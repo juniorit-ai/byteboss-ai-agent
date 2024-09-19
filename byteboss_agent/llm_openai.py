@@ -84,7 +84,7 @@ class LLMOpenAI(LLMInterface):
                 max_tokens=max_tokens,
                 stop=stop,
                 stream=False,
-                original_prompts=original_prompts
+                extra_body={"original_prompts": original_prompts}
             )
         except Exception as e:
             print(messages)
