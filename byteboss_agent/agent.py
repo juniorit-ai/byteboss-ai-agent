@@ -40,27 +40,44 @@ class Agent:
     }
 
     @staticmethod
-    def load_ignore_list(ignore_file):
-        ignore_list = set()
-        if os.path.exists(ignore_file):
-            with open(ignore_file, 'r') as f:
+    def load_filter_file(directory, filter_file):
+        filter = os.path.join(directory, filter_file)
+        
+        fliter_list = set()
+        if os.path.exists(filter):
+            with open(filter, 'r') as f:
                 for line in f:
                     line = line.strip()
                     if line and not line.startswith('#'):
-                        ignore_list.add(line)
-        return ignore_list
+                        fliter_list.add(line)
+        return fliter_list
 
     @staticmethod
-    def should_ignore(file_path, ignore_list):
+    def should_ignore(file_path, ignore_list, include_list):
+        ignored = False
+        ignore_list.add('node_modules') # Ignore node_modules by default
+        
         for ignore_item in ignore_list:
             if ignore_item == 'ALL':
-                return True
+                ignored = True
+                break
             ignore_dir = os.path.join(ignore_item, '')  # Adds trailing slash for directory check
             if ignore_dir in file_path:
-                return True
+                ignored = True
+                break
             if file_path.endswith(ignore_item):
-                return True
-        return False
+                ignored = True
+                break
+                
+        for include_item in include_list:
+            ignore_dir = os.path.join(ignore_item, '')  # Adds trailing slash for directory check
+            if ignore_dir in file_path:
+                ignored = False
+                break
+            if file_path.endswith(ignore_item):
+                ignored = False
+                break
+        return ignored
     
     @staticmethod
     def read_image_as_base64(file_path):
@@ -79,13 +96,13 @@ class Agent:
             return image_url
 
     @staticmethod
-    def read_files_in_directory(directory, ignore_list):
+    def read_files_in_directory(directory, ignore_list, include_list):
         file_contents = {}
         images = []
         for root, _, files in os.walk(directory):
             for file in files:
                 file_path = os.path.join(root, file)
-                if Agent.should_ignore(file_path, ignore_list):
+                if Agent.should_ignore(file_path, ignore_list, include_list):
                     continue
                 if file_path.endswith('.prompt.png') or file_path.endswith('.prompt.jpg') or file_path.endswith('.prompt.jpeg'):
                     images.append(Agent.read_image_as_base64(file_path))
@@ -109,13 +126,14 @@ class Agent:
         return Agent.EXTENSION_TO_LANGUAGE.get(ext, '')
 
     @staticmethod
-    def generate_context(code_references_dir, code_prompts_dir, code_output_dir, ignore_file):
+    def generate_context(code_references_dir, code_prompts_dir, code_output_dir, ignore_file, include_file):
         referenced_files_context = ''
         image_urls = []
         
         # Read reference files
-        ignore_list = Agent.load_ignore_list(os.path.join(code_references_dir, ignore_file))
-        reference_files, ref_image_urls = Agent.read_files_in_directory(code_references_dir, ignore_list)
+        ignore_list = Agent.load_filter_file(code_references_dir, ignore_file)
+        include_list = Agent.load_filter_file(code_references_dir, include_file)
+        reference_files, ref_image_urls = Agent.read_files_in_directory(code_references_dir, ignore_list, include_list)
         if reference_files:
             referenced_files_context += f'There are total {len(reference_files)} files for you to reference only (it is not allowed to update these files, also do not mention it in any document file)\n\n'
             for i, (file_path, content) in enumerate(reference_files.items(), start = 1):
@@ -131,8 +149,9 @@ class Agent:
         T2DO = 'TO' + 'DO' # The TO DO keyword to search for in the output files, we just mask it here to avoid the system to process it
         
         # Read output files
-        ignore_list = Agent.load_ignore_list(os.path.join(code_output_dir, ignore_file))
-        output_files, out_image_urls = Agent.read_files_in_directory(code_output_dir, ignore_list)
+        ignore_list = Agent.load_ignore_list(code_output_dir, ignore_file)
+        include_list = Agent.load_ignore_list(code_output_dir, include_file)
+        output_files, out_image_urls = Agent.read_files_in_directory(code_output_dir, ignore_list, include_list)
         if output_files:
             non_todo_files = {fp: c for fp, c in output_files.items() if f'{T2DO}:' not in c and not fp.endswith('.prompt.md') and not fp.endswith('.tagscript.md')}
             todo_files = {fp: c for fp, c in output_files.items() if f'{T2DO}:' in c and not fp.endswith('.prompt.md') and not fp.endswith('.tagscript.md')}
@@ -158,8 +177,9 @@ class Agent:
         original_prompts = []
         
         # Read prompt files from CODE_PROMPTS_DIR
-        ignore_list = Agent.load_ignore_list(os.path.join(code_prompts_dir, ignore_file))
-        prompt_files, _ = Agent.read_files_in_directory(code_prompts_dir, ignore_list)
+        ignore_list = Agent.load_ignore_list(code_prompts_dir, ignore_file)
+        include_list = Agent.load_ignore_list(code_prompts_dir, include_file)
+        prompt_files, _ = Agent.read_files_in_directory(code_prompts_dir, ignore_list, include_list)
         prompt_files = {fp: c for fp, c in prompt_files.items() if fp.endswith('.prompt.md')}
         
         # Combine all the *.prompt.md files content together and show it, just separate by line
